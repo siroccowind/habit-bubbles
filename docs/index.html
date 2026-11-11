@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="demo/icon.svg" />
+<title>习惯气泡 · 产品介绍</title>
+<style>
+  :root{--ink:#17304a;--muted:#5b738b;--faint:#8fa6ba;--line:#dbe8f2;--blue:#2b7fc4;--blue-pale:#eaf5fd;--paper:#f3f8fc}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;line-height:1.8}
+  .wrap{max-width:980px;margin:0 auto;padding:0 22px 80px}
+  a{color:var(--blue)}
+  h2{font-size:19px;margin:0 0 5px;font-weight:800}
+  .sub{font-size:12.8px;color:var(--faint);margin:0 0 20px}
+  section{margin-top:52px;scroll-margin-top:20px}
+
+  /* 首屏 */
+  header{position:relative;padding:64px 0 8px;overflow:hidden}
+  .bubs{position:absolute;right:6px;top:34px;width:230px;height:150px;pointer-events:none}
+  .bub{position:absolute;border-radius:50%;opacity:.5}
+  .b1{width:88px;height:88px;right:0;top:6px;background:#bfe0f7}
+  .b2{width:54px;height:54px;right:96px;top:52px;background:#ffd9a8}
+  .b3{width:34px;height:34px;right:44px;top:104px;background:#c9ecd8}
+  .eyebrow{font-size:11px;letter-spacing:.26em;color:var(--blue);font-weight:800}
+  h1{font-size:38px;margin:12px 0 10px;font-weight:900;letter-spacing:-.6px}
+  .lead{font-size:16px;color:var(--muted);margin:0;line-height:1.95;max-width:600px}
+  .meta{font-size:12px;color:var(--faint);margin:16px 0 0}
+
+  /* 演示 */
+  .demo{background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px}
+  .demo-grid{display:grid;grid-template-columns:250px 1fr;gap:30px;align-items:start}
+  .demo-video{display:block;width:100%;border:1px solid var(--line);border-radius:12px;background:#fff}
+  .video-meta{font-size:11.5px;color:var(--faint);text-align:center;margin-top:9px}
+  .pitch .k{font-size:11px;letter-spacing:.14em;color:var(--blue);font-weight:800}
+  .pitch .name{font-size:13px;color:var(--faint);margin:2px 0 10px}
+  .pitch h3{font-size:25px;line-height:1.45;font-weight:900;letter-spacing:-.4px;margin:0 0 10px}
+  .pitch .d{font-size:13.2px;color:var(--muted);line-height:1.9;margin:0;max-width:520px}
+  .thumbs{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:22px}
+  .thumb{position:relative;border:1px solid var(--line);background:#fff;border-radius:9px;padding:3px;cursor:pointer;overflow:hidden;transition:border-color .15s ease}
+  .thumb:hover{border-color:#9ec9e8}
+  .thumb.on{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-pale)}
+  .thumb img{width:100%;display:block;border-radius:5px;aspect-ratio:296/640;object-fit:cover;background:#f8fbfe}
+  .thumb b{position:absolute;left:6px;top:5px;font-size:10px;color:#fff;background:rgba(23,48,74,.55);border-radius:4px;padding:0 4px;font-weight:700}
+  .empty{border:1px dashed #b9d3e8;border-radius:12px;padding:22px;background:#fbfdff;font-size:13px;color:var(--muted);line-height:1.9}
+  .empty b{color:var(--ink)}
+
+  /* 一页纸 */
+  .def{background:#fff;border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:0 12px 12px 0;
+    padding:20px 24px;font-size:16px;line-height:1.95;font-weight:600}
+  .def span{display:block;margin-top:8px;font-size:13.2px;color:var(--muted);font-weight:400}
+  .facts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+  .fact{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .fact .n{font-size:26px;font-weight:900;letter-spacing:-.5px;line-height:1.2}
+  .fact .n small{font-size:12px;font-weight:700;color:var(--muted);margin-left:3px}
+  .fact .k{font-size:12px;color:var(--muted);line-height:1.7;margin-top:7px}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+  .step{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:flex;gap:14px;align-items:center}
+  .step .ic{flex:0 0 42px;height:42px;border-radius:50%;background:var(--blue-pale);display:flex;align-items:center;justify-content:center;gap:3px}
+  .step .ic i{display:block;width:9px;height:9px;border-radius:50%;background:#7fb6e0}
+  .step .ic i:first-child{background:#f0c274;width:13px;height:13px}
+  .step .ic.calendar{border-radius:9px;display:grid;grid-template-columns:repeat(4,5px);gap:3px;padding:6px}
+  .step .ic.calendar i{width:5px;height:5px;border-radius:1px;background:#b7d5ec}
+  .step .ic.calendar i:nth-child(3n){background:#5aa77c}
+  .step .ic.eye{border-radius:9px}
+  .step .ic.eye i{width:16px;height:10px;border-radius:50%;background:#fff;border:2px solid #7fb6e0}
+  .step b{display:block;font-size:14px}
+  .step span{display:block;font-size:12px;color:var(--muted);line-height:1.65;margin-top:2px}
+
+  /* 截图 */
+  .group{margin-bottom:32px}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+  figure{margin:0;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+  .shot{height:330px;background:#f8fbfe;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:zoom-in}
+  .shot img{width:100%;height:100%;object-fit:contain;display:block}
+  figure.missing .shot{position:relative}
+  figure.missing .shot img{display:none}
+  figure.missing .shot::before{content:'截图待上传';position:absolute;font-size:12px;color:var(--faint);
+    border:1px dashed #b9d3e8;border-radius:8px;padding:8px 14px;background:#fbfdff}
+  figcaption{padding:11px 13px 13px;border-top:1px solid var(--line)}
+  figcaption b{display:block;font-size:13px;font-weight:750}
+  figcaption span{display:block;font-size:11.8px;color:var(--muted);line-height:1.7;margin-top:3px}
+
+  /* 出口 */
+  .out{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+  .card{display:block;background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;
+    text-decoration:none;color:inherit;border-left:3px solid var(--blue);transition:transform .15s ease}
+  a.card:hover{transform:translateY(-2px)}
+  .k{font-size:11px;letter-spacing:.14em;color:var(--faint);font-weight:800}
+  .t{font-size:16px;font-weight:800;margin:7px 0 5px}
+  .d{font-size:12.8px;color:var(--muted);line-height:1.8}
+  .go{display:inline-block;margin-top:10px;font-size:12.5px;color:var(--blue);font-weight:700}
+
+  .note{margin-top:34px;font-size:12px;color:var(--faint);line-height:1.9}
+  footer{margin-top:28px;font-size:12px;color:var(--faint);text-align:center}
+
+  .lightbox{position:fixed;inset:0;background:rgba(12,26,42,.9);display:none;align-items:center;justify-content:center;z-index:99;padding:20px}
+  .lightbox.on{display:flex}
+  .lightbox img{max-width:96vw;max-height:94vh;object-fit:contain;border-radius:10px;background:#fff}
+  .lightbox .close{position:absolute;top:18px;right:22px;color:#fff;font-size:28px;cursor:pointer;line-height:1}
+
+  @media(max-width:820px){
+    .facts{grid-template-columns:repeat(2,1fr)}
+    .steps{grid-template-columns:1fr}
+    .demo-grid{grid-template-columns:1fr;gap:22px}
+    .demo-video{max-width:250px;margin:0 auto}
+    .grid{grid-template-columns:repeat(2,1fr)}
+    .out{grid-template-columns:1fr}
+    .bubs{opacity:.5;right:-30px}
+  }
+  @media(max-width:520px){
+    .wrap{padding:0 16px 60px}header{padding-top:44px}h1{font-size:28px}
+    .demo{padding:16px 14px}.pitch h3{font-size:21px}
+    .facts{grid-template-columns:1fr 1fr}
+    .thumbs{grid-template-columns:repeat(3,1fr)}
+    .grid{grid-template-columns:1fr}.shot{height:420px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="bubs" aria-hidden="true"><i class="bub b1"></i><i class="bub b2"></i><i class="bub b3"></i></div>
+    <div class="eyebrow">产品介绍 · Product</div>
+    <h1>习惯气泡</h1>
+    <p class="lead">一个装在手机桌面上的小本子。点一下戳破气泡，一天就算记完了；没做到的那天，它就空着。</p>
+    <div class="meta">2026.10.23 — 11.06 · 九个活跃工作日 · 已投入使用 · 本地优先 PWA</div>
+  </header>
+
+  <!-- 一页纸 -->
+  <section id="overview">
+    <h2>一页纸看懂</h2>
+    <p class="sub">没参与过的人，读完这一页就够了。</p>
+    <div class="def">
+      不催你、不补签、不弹通知。过一阵子回头看，日历和图表会告诉你：这段时间，我到底是怎么过的。
+      <span>它不是待办清单，也不是打卡闯关；包括那些想改掉、但不想被骂的事，也照实记。</span>
+    </div>
+    <div class="facts">
+      <div class="fact"><div class="n">2<small>次点击</small></div><div class="k">完成一次记录，不用打字</div></div>
+      <div class="fact"><div class="n">6<small>＋3</small></div><div class="k">最多 6 个好习惯、3 个坏习惯</div></div>
+      <div class="fact"><div class="n">100<small>% 本机</small></div><div class="k">记录只留在这台手机里</div></div>
+      <div class="fact"><div class="n">0<small>条推送</small></div><div class="k">不提醒、不补签、不排名</div></div>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="ic"><i></i><i></i><i></i></div><div><b>打开就戳</b><span>点一下就算完成，偶尔掉个小物件。</span></div></div>
+      <div class="step"><div class="ic calendar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div><b>攒成日历</b><span>颜色深浅就是那段时间的状态。</span></div></div>
+      <div class="step"><div class="ic eye"><i></i></div><div><b>回头看一眼</b><span>记下来就够了，不评价自己。</span></div></div>
+    </div>
+  </section>
+
+  <!-- 演示：左画面，右卖点 -->
+  <section id="demo">
+    <h2>先看它怎么用</h2>
+    <p class="sub">六段真机录屏，一段一个卖点；点下面的画面切换。</p>
+    <div class="demo">
+      <div class="demo-grid">
+        <div>
+          <video class="demo-video" id="clipVideo" controls playsinline preload="metadata" poster="media/poster-01.jpg"></video>
+          <div class="video-meta" id="videoMeta">竖屏真机录屏 · 分功能片段</div>
+        </div>
+        <div class="pitch">
+          <div class="k" id="pitchK">第 01 段 / 共 06 段</div>
+          <div class="name" id="pitchName">新建习惯</div>
+          <h3 id="pitchPoint">建一个习惯，不用填表</h3>
+          <p class="d" id="pitchDesc">模板点一下就建好；自定义时从 18 种颜色、40 个常用图标里挑，名字想写才写。</p>
+          <div class="thumbs" id="thumbs"></div>
+          <div class="empty" id="clipEmpty" hidden><b>演示片段待补。</b><br>把 <code>clip-01</code> ~ <code>clip-06</code> 的 MP4 放进 <code>docs/media/</code> 即可自动出现。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 截图 -->
+  <section id="screens">
+    <div class="group">
+      <div class="group-head"><h2>每天怎么用</h2><p class="sub">两种打卡形式、补记入口，设置都收在一处。</p></div>
+      <div class="grid">
+        <figure><div class="shot"><img src="media/01-today-bubbles.png" alt="习惯页气泡模式" tabindex="0" role="button"></div><figcaption><b>气泡打卡</b><span>点一下戳破气泡就算完成；暗影区里的坏习惯，没发生就不用记。</span></figcaption></figure>
+        <figure><div class="shot"><img src="media/02-today-list.png" alt="习惯页列表模式" tabindex="0" role="button"></div><figcaption><b>列表模式</b><span>同一套数据换成极简列表，右侧圆点勾选。</span></figcaption></figure>
+        <figure><div class="shot"><img src="media/03-calendar.png" alt="日历补记弹层" tabindex="0" role="button"></div><figcaption><b>日历补记</b><span>翻开月历切到过去那天，照实补记一笔；未来的日子不能记。</span></figcaption></figure>
+        <figure><div class="shot"><img src="media/08-settings.png" alt="设置页" tabindex="0" role="button"></div><figcaption><b>设置</b><span>主题、打卡形式、音效、体感、数据导出都在这里。</span></figcaption></figure>
+      </div>
+    </div>
+    <div class="group">
+      <div class="group-head"><h2>回头看数据</h2><p class="sub">全局与单个习惯两个视角，好绿坏红是同一套语言。</p></div>
+      <div class="grid">
+        <figure><div class="shot"><img src="media/04-stats-good.png" alt="统计页好习惯" tabindex="0" role="button"></div><figcaption><b>统计 · 好习惯</b><span>完成次数、打卡天数、最长连续与完成率，加柱状图和年度点阵。</span></figcaption></figure>
+        <figure><div class="shot"><img src="media/05-stats-bad.png" alt="统计页坏习惯" tabindex="0" role="button"></div><figcaption><b>统计 · 坏习惯</b><span>中性账本：记录发生次数与连续未发生，不做道德评判。</span></figcaption></figure>
+        <figure><div class="shot"><img src="media/06-detail-good.png" alt="好习惯详情页" tabindex="0" role="button"></div><figcaption><b>单习惯详情 · 好</b><span>月历里绿色是做到、红色是没做到，下面还有年度完成点阵。</span></figcaption></figure>
+        <figure><div class="shot"><img src="media/07-detail-bad.png" alt="坏习惯详情页" tabindex="0" role="button"></div><figcaption><b>单习惯详情 · 坏</b><span>同一套月历语言换成红色，只表示当天发生过。</span></figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="more">
+    <h2>还想看</h2>
+    <p class="sub">产品到这儿就够了，下面留给想看细节的人。</p>
+    <div class="out">
+      <a class="card" href="retrospective-2026-11-10.html"><div class="k">01 · 复盘</div><div class="t">项目复盘</div><div class="d">九天怎么做完的、哪些做法值得带到下个项目、需求方自己写的自评原话。</div><span class="go">打开复盘 →</span></a>
+      <a class="card" href="https://github.com/siroccowind/habit-bubbles"><div class="k">02 · 源码</div><div class="t">源码与 PRD</div><div class="d">纯本地版前端源码、需求文档定稿、设计取舍与运行方式。</div><span class="go">前往仓库 →</span></a>
+      <a class="card" href="demo/index.html"><div class="k">03 · 演示</div><div class="t">打开就能玩</div><div class="d">纯本地演示版：不用登录，数据只留在你自己的浏览器，不上传。</div><span class="go">打开演示 →</span></a>
+    </div>
+  </section>
+
+  <div class="note">本站与仓库均为作品集展示用途，不含账号体系、云端备份、访问凭据或访问码；演示版同为纯静态、无云端、不含任何真实记录。截图与录屏来自真实使用画面；项目复盘第 07 节收录了需求方自己写的《自我复盘》，拿到链接即可访问。</div>
+  <footer>习惯气泡 · 纯前端、本地存储、零第三方请求</footer>
+</div>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-label="查看大图">
+  <span class="close" id="lightboxClose" aria-label="关闭">×</span>
+  <img id="lightboxImg" alt="界面截图大图">
+</div>
+
+<script>
+(function () {
+  var CLIPS = [
+    { no:'01', file:'media/clip-01-create.mp4',     poster:'media/poster-01.jpg', name:'新建习惯',   point:'建一个习惯，不用填表',       desc:'模板点一下就建好；自定义时从 18 种颜色、40 个常用图标里挑，名字想写才写。' },
+    { no:'02', file:'media/clip-02-checkin.mp4',    poster:'media/poster-02.jpg', name:'气泡打卡',   point:'两次点击，一天记完了',       desc:'戳破气泡的那一下就是反馈；全部完成会有「完美的一天」，偶尔掉个小彩蛋。' },
+    { no:'03', file:'media/clip-03-calendar.mp4',   poster:'media/poster-03.jpg', name:'日历与补记', point:'忘了的那天，也能补记',       desc:'点顶部日期翻开月历、切到过去那天照实补一笔；不做补签卡，也不给连续天数护盾。' },
+    { no:'04', file:'media/clip-04-stats.mp4',      poster:'media/poster-04.jpg', name:'统计与详情', point:'把日子变成看得见的形状',     desc:'日 / 周 / 月 / 年，全局与单个习惯两个视角：柱状图、月历、年度点阵。' },
+    { no:'05', file:'media/clip-05-settings.mp4',   poster:'media/poster-05.jpg', name:'设置与形态', point:'样子随你，数据不变',         desc:'气泡还是列表、浅色还是深色，随时切换；同一套记录换个模样继续用。' },
+    { no:'06', file:'media/clip-06-collection.mp4', poster:'media/poster-06.jpg', name:'收藏与掉落', point:'一点乐趣，但不打扰',         desc:'掉落物收进收藏室，普通 / 稀有 / 史诗只是彩蛋；不推送、不排名、不逼你集齐。' }
+  ];
+
+  var video = document.getElementById('clipVideo');
+  var thumbs = document.getElementById('thumbs');
+  var empty = document.getElementById('clipEmpty');
+  var meta = document.getElementById('videoMeta');
+  var K = document.getElementById('pitchK');
+  var N = document.getElementById('pitchName');
+  var P = document.getElementById('pitchPoint');
+  var D = document.getElementById('pitchDesc');
+  var buttons = [];
+
+  function show(c) {
+    K.textContent = '第 ' + c.no + ' 段 / 共 ' + String(CLIPS.length).padStart(2, '0') + ' 段';
+    N.textContent = c.name;
+    P.textContent = c.point;
+    D.textContent = c.desc;
+    video.poster = c.poster;
+    video.src = c.file;
+    video.load();
+    var p = video.play(); if (p && p.catch) p.catch(function () {});
+    meta.textContent = c.name + ' · 竖屏真机录屏';
+    buttons.forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-no') === c.no); });
+  }
+
+  CLIPS.forEach(function (c, i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'thumb' + (i === 0 ? ' on' : '');
+    b.setAttribute('data-no', c.no);
+    b.setAttribute('aria-label', '播放第 ' + c.no + ' 段：' + c.name);
+    b.innerHTML = '<img src="' + c.poster + '" alt="' + c.name + '"><b>' + c.no + '</b>';
+    b.addEventListener('click', function () { show(c); });
+    thumbs.appendChild(b);
+    buttons.push(b);
+  });
+
+  // 只把确实存在的片段标为可播放；缺片段时提示，不出现死链
+  var pending = CLIPS.length, found = [];
+  CLIPS.forEach(function (c) {
+    var probe = document.createElement('video');
+    probe.preload = 'metadata'; probe.muted = true;
+    var done = false;
+    function finish(ok) {
+      if (done) return; done = true;
+      if (ok) found.push(c);
+      if (--pending === 0) {
+        if (found.length) {
+          found.sort(function (a, b) { return a.no < b.no ? -1 : 1; });
+          show(found[0]);
+        } else {
+          empty.hidden = false;
+          meta.textContent = '演示片段待补';
+        }
+      }
+    }
+    probe.addEventListener('loadedmetadata', function () { finish(true); });
+    probe.addEventListener('error', function () { finish(false); });
+    probe.src = c.file; probe.load();
+    setTimeout(function () { finish(false); }, 5000);
+  });
+
+  // 截图放大
+  var box = document.getElementById('lightbox');
+  var big = document.getElementById('lightboxImg');
+  function open(src, alt) { big.src = src; big.alt = alt || '界面截图'; box.classList.add('on'); }
+  function close() { box.classList.remove('on'); big.src = ''; }
+  Array.prototype.forEach.call(document.querySelectorAll('.shot img'), function (img) {
+    function fail() { var f = img.closest('figure'); if (f) f.classList.add('missing'); }
+    img.addEventListener('error', fail);
+    if (img.complete && img.naturalWidth === 0) fail();
+    img.addEventListener('click', function () { if (img.naturalWidth) open(img.src, img.alt); });
+    img.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(img.src, img.alt); }
+    });
+  });
+  document.getElementById('lightboxClose').addEventListener('click', close);
+  box.addEventListener('click', function (e) { if (e.target === box) close(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+})();
+</script>
+</body>
+</html>

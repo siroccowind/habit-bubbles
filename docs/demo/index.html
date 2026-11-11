@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#F5F5F7" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="习惯气泡" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>习惯气泡</title>
+    <!-- 冷启动立即定主题：读 localStorage，避免先白后黑闪一下 -->
+    <script>
+      ;(function () {
+        try {
+          var t = localStorage.getItem('hb-theme')
+          var dark =
+            t === 'dark' || ((!t || t === 'auto') && window.matchMedia('(prefers-color-scheme: dark)').matches)
+          document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+        } catch (e) {}
+      })()
+    </script>
+    <style>
+      /* 启动占位：JS 下载/解析期间就显示，不再白屏干等 */
+      #boot {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        background: #f5f5f7;
+        transition: opacity 0.26s ease;
+      }
+      html[data-theme='dark'] #boot {
+        background: #000;
+      }
+      #boot .dots {
+        display: flex;
+        gap: 9px;
+      }
+      #boot .dots i {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #007aff;
+        opacity: 0.3;
+        animation: bb 1.15s ease-in-out infinite;
+      }
+      #boot .dots i:nth-child(2) {
+        background: #34c759;
+        animation-delay: 0.14s;
+      }
+      #boot .dots i:nth-child(3) {
+        background: #ff9f0a;
+        animation-delay: 0.28s;
+      }
+      #boot .t {
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        color: #8e8e93;
+        font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+      }
+      #boot.out {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #boot-err {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 0 32px;
+        text-align: center;
+      }
+      #boot-err[hidden] {
+        display: none;
+      }
+      #boot-err .e1 {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1d1d1f;
+      }
+      html[data-theme='dark'] #boot-err .e1 {
+        color: #f5f5f7;
+      }
+      #boot-err .e2 {
+        font-size: 12px;
+        color: #8e8e93;
+      }
+      #boot-err button {
+        font-family: inherit;
+        font-size: 13px;
+        padding: 9px 18px;
+        border-radius: 999px;
+        border: none;
+        background: #007aff;
+        color: #fff;
+      }
+      #boot-err button#boot-reset {
+        background: transparent;
+        color: #8e8e93;
+        text-decoration: underline;
+        padding: 4px 8px;
+      }
+      @keyframes bb {
+        0%,
+        100% {
+          transform: translateY(0);
+          opacity: 0.3;
+        }
+        50% {
+          transform: translateY(-8px);
+          opacity: 1;
+        }
+      }
+    </style>
+    <script type="module" crossorigin src="./assets/index-C4mr90O2.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-ZQ-H_80i.css">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
+  </head>
+  <body>
+    <div id="boot">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="t">习惯气泡</div>
+      <div id="boot-err" hidden>
+        <p class="e1">加载失败了</p>
+        <p class="e2">可能是网络不稳，或本地缓存了旧版本</p>
+        <button id="boot-retry" type="button">重新加载</button>
+        <button id="boot-reset" type="button">清除缓存后重载</button>
+      </div>
+    </div>
+    <div id="root"></div>
+    <script>
+      // 兜底：JS 若因缓存/网络问题没跑起来，6 秒后给出自救入口（不必让用户干等）
+      ;(function () {
+        var boot = document.getElementById('boot')
+        if (!boot) return
+        setTimeout(function () {
+          if (window.__hbMounted) return
+          var err = document.getElementById('boot-err')
+          var dots = boot.querySelector('.dots')
+          if (dots) dots.style.display = 'none'
+          if (err) err.hidden = false
+        }, 6000)
+        var retry = document.getElementById('boot-retry')
+        if (retry)
+          retry.addEventListener('click', function () {
+            location.reload()
+          })
+        var reset = document.getElementById('boot-reset')
+        if (reset)
+          reset.addEventListener('click', function () {
+            var jobs = []
+            if (navigator.serviceWorker)
+              jobs.push(
+                navigator.serviceWorker.getRegistrations().then(function (rs) {
+                  return Promise.all(
+                    rs.map(function (r) {
+                      return r.unregister()
+                    }),
+                  )
+                }),
+              )
+            if (window.caches)
+              jobs.push(
+                caches.keys().then(function (ks) {
+                  return Promise.all(
+                    ks.map(function (k) {
+                      return caches.delete(k)
+                    }),
+                  )
+                }),
+              )
+            Promise.all(jobs).then(
+              function () {
+                location.reload()
+              },
+              function () {
+                location.reload()
+              },
+            )
+          })
+      })()
+    </script>
+  </body>
+</html>

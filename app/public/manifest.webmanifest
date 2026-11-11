@@ -1,0 +1,31 @@
+{
+  "id": "./",
+  "name": "习惯气泡",
+  "short_name": "习惯气泡",
+  "description": "戳破气泡，养成习惯：当日打卡、掉落玩具、数据可视化",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5F5F7",
+  "theme_color": "#F5F5F7",
+  "lang": "zh-CN",
+  "categories": [
+    "lifestyle",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- maskable：内容收在安全区（中心 80%）内，背景满铺 -->
+  <rect width="512" height="512" fill="#F5F5F7"/>
+  <circle cx="256" cy="256" r="150" fill="#007AFF"/>
+  <circle cx="205" cy="205" r="36" fill="#FFFFFF" opacity="0.55"/>
+  <circle cx="330" cy="290" r="26" fill="#34C759"/>
+  <circle cx="195" cy="330" r="22" fill="#FF9500"/>
+</svg>

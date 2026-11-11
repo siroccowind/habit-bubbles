@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="demo/icon.svg" />
+<title>习惯气泡 · 项目复盘 · 2026-11-10</title>
+<style>
+  :root{
+    --paper:#f3f8fc; --card:#ffffff; --ink:#17304a; --muted:#5b738b; --faint:#8fa6ba;
+    --line:#dbe8f2; --blue:#2b7fc4; --blue-soft:#9cccf0; --blue-pale:#eaf5fd;
+    --good:#2c9a6a; --bad:#cf5a4c; --gold:#bd8b2f; --warm:#eda869;
+    --toc-w:214px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; padding-left:var(--toc-w);
+    background:var(--paper); color:var(--ink);
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+    font-size:15.5px; line-height:1.9; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:930px;margin:0 auto;padding:0 32px 110px}
+
+  /* 顶部进度 */
+  .prog{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--blue),var(--warm));z-index:60;transition:width .1s linear}
+
+  /* 目录 */
+  .toc{
+    position:fixed;left:0;top:0;bottom:0;width:var(--toc-w);
+    border-right:1px solid var(--line);background:#f9fcfe;
+    padding:34px 18px 24px;z-index:50;overflow:auto;
+  }
+  .toc-t{font-size:11px;letter-spacing:.2em;color:var(--faint);font-weight:800;margin:0 0 18px 8px}
+  .toc a{
+    display:flex;gap:9px;align-items:baseline;padding:9px 8px;margin-bottom:2px;
+    color:var(--muted);text-decoration:none;font-size:12.8px;line-height:1.55;border-radius:6px;
+    border-left:2px solid transparent;
+  }
+  .toc a .i{font-size:10.5px;color:var(--faint);font-weight:800;min-width:18px}
+  .toc a:hover{background:var(--blue-pale);color:var(--ink)}
+  .toc a.on{background:var(--blue-pale);color:var(--blue);border-left-color:var(--blue);font-weight:700}
+  .toc a.on .i{color:var(--blue)}
+  .toc-n{font-size:11px;color:var(--faint);line-height:1.7;margin:22px 8px 0;padding-top:16px;border-top:1px solid var(--line)}
+  .toc a.back{color:var(--blue);font-weight:700;background:var(--blue-pale);border-left-color:var(--blue);margin-bottom:16px}
+
+  /* 封面 */
+  header{padding:70px 0 44px;border-bottom:1px solid var(--line);margin-bottom:50px;position:relative}
+  .bubs{position:absolute;right:8px;top:44px;width:210px;height:190px;pointer-events:none}
+  .bub{
+    position:absolute;border-radius:50%;
+    background:radial-gradient(circle at 30% 24%,#fff 0%,#dcefff 24%,#9cccf0 62%,#5a9ed8 100%);
+    box-shadow:inset -7px -9px 16px rgba(20,80,140,.13),0 10px 24px rgba(43,127,196,.13);
+    opacity:.78;
+  }
+  .b1{width:96px;height:96px;right:18px;top:8px}
+  .b2{width:52px;height:52px;right:112px;top:78px;opacity:.62}
+  .b3{width:30px;height:30px;right:36px;top:128px;opacity:.5}
+  .eyebrow{font-size:11.5px;letter-spacing:.26em;color:var(--blue);font-weight:800;margin-bottom:18px}
+  h1{font-size:38px;line-height:1.28;margin:0 0 16px;font-weight:900;letter-spacing:-.5px;max-width:620px}
+  h1 small{display:block;font-size:15px;font-weight:400;color:var(--muted);letter-spacing:0;margin-top:16px;line-height:1.95}
+  h1 small b{color:var(--ink);font-weight:650}
+  .meta{display:flex;gap:24px;flex-wrap:wrap;font-size:12.5px;color:var(--faint);margin-top:24px}
+  .meta b{color:var(--ink);font-weight:650}
+  .lead{
+    background:var(--card);border:1px solid var(--line);border-left:3px solid var(--blue);
+    padding:20px 24px;margin-top:30px;font-size:14.8px;line-height:2;color:#3c536a;
+  }
+  .lead strong{color:var(--ink)}
+
+  /* 章节 */
+  section{margin-bottom:62px;scroll-margin-top:24px}
+  .sec-head{display:flex;align-items:baseline;gap:13px;margin-bottom:8px}
+  .num{font-size:11.5px;font-weight:800;color:var(--blue);letter-spacing:.12em;min-width:24px;padding-top:6px}
+  h2{font-size:24px;margin:0;font-weight:800;letter-spacing:-.3px}
+  .sub{color:var(--muted);font-size:13.5px;margin:0 0 26px 37px}
+  h3{font-size:16px;margin:34px 0 14px;font-weight:750}
+  p{margin:0 0 15px}
+  .quiet{color:var(--muted);font-size:13.8px}
+
+  /* 速览 */
+  .def{
+    background:linear-gradient(135deg,#fff 0%,#f2f9ff 100%);
+    border:1px solid var(--line);border-radius:14px;padding:26px 28px;
+    font-size:18px;line-height:2.05;color:var(--ink);font-weight:600;
+  }
+  .def span{display:block;margin-top:12px;font-size:14.5px;font-weight:400;color:var(--muted);line-height:1.95}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin:22px 0 30px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:17px 15px}
+  .stat .n{font-size:27px;font-weight:900;letter-spacing:-1px;line-height:1.15;color:var(--blue)}
+  .stat .n span{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:0;margin-left:2px}
+  .stat .n span.pct{margin-left:0}
+  .stat .k{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6}
+
+  .flow{display:flex;gap:14px;align-items:stretch;margin:6px 0 26px;flex-wrap:wrap}
+  .fstep{
+    flex:1 1 0;min-width:190px;background:var(--card);border:1px solid var(--line);
+    border-radius:10px;padding:18px 18px 16px;position:relative;
+  }
+  .fstep:not(:last-child)::after{
+    content:"→";position:absolute;right:-15px;top:50%;transform:translateY(-50%);
+    color:var(--blue-soft);font-size:16px;z-index:2;background:var(--paper);line-height:1;padding:2px 0;
+  }
+  .fstep .fi{font-size:10.5px;letter-spacing:.14em;color:var(--faint);font-weight:800}
+  .fstep .fn{font-size:15.5px;font-weight:800;margin:4px 0 8px}
+  .fstep .fd{font-size:12.8px;color:var(--muted);line-height:1.75}
+  .bubble-demo{display:flex;gap:7px;align-items:center;margin-top:12px;height:30px}
+  .bubble-demo i{
+    width:22px;height:22px;border-radius:50%;display:block;
+    background:radial-gradient(circle at 30% 25%,#fff,#b9dcf7 45%,#5a9ed8);
+    box-shadow:0 3px 7px rgba(43,127,196,.18);
+  }
+  .bubble-demo i.pop{opacity:.22;box-shadow:none;transform:scale(.55)}
+  .minical{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px;width:126px}
+  .minical i{width:12px;height:12px;border-radius:50%;background:#e3ecf3;display:block}
+  .minical i.g{background:var(--good)} .minical i.g2{background:#a5d9bd}
+  .minical i.n{background:#f1f5f8}
+  .onepage-foot{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+  .onepage-foot div{background:#f7fbff;border:1px solid var(--line);border-radius:9px;padding:15px 17px;font-size:13.5px;color:var(--muted);line-height:1.85}
+  .onepage-foot b{color:var(--ink);display:block;font-size:12px;letter-spacing:.08em;margin-bottom:5px}
+
+  /* 差异对照 */
+  .diff{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin:6px 0 18px}
+  .dcol{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:19px 20px}
+  .dcol.cur{background:var(--blue-pale);border-color:#c6e2f6}
+  .pill{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;padding:3px 9px;border-radius:20px;background:#eef2f6;color:var(--muted);margin-bottom:12px}
+  .dcol.cur .pill{background:var(--blue);color:#fff}
+  .dcol h4{margin:0 0 8px;font-size:15.5px;font-weight:800}
+  .dcol p{margin:0;font-size:13.5px;color:var(--muted);line-height:1.85}
+  .thesis{
+    border-left:3px solid var(--gold);background:#fdf9ef;padding:16px 21px;margin:20px 0 8px;
+    font-size:14.5px;line-height:1.95;color:#4a4636;border-radius:0 8px 8px 0;
+  }
+  .thesis b{color:var(--ink)}
+  .thesis .small{display:block;font-size:12.5px;color:var(--muted);margin-top:6px}
+
+  /* 阶段条 + 时间线 */
+  .phases{display:grid;grid-template-columns:1.1fr 1fr 1.6fr 1fr .8fr;gap:7px;margin:10px 0 6px}
+  .ph{border:1px solid var(--line);background:#fff;border-radius:8px;padding:11px 8px;text-align:center}
+  .ph .bar{height:5px;border-radius:3px;background:linear-gradient(90deg,var(--blue),var(--blue-soft));margin-bottom:9px}
+  .ph:last-child .bar{background:linear-gradient(90deg,var(--gold),var(--warm))}
+  .ph .t{font-size:11.8px;font-weight:700;line-height:1.5}
+  .ph .s{font-size:10.5px;color:var(--faint);margin-top:4px}
+  .ph-note{font-size:12.2px;color:var(--faint);margin-top:8px}
+
+  .tl{border-left:2px solid var(--line);margin:22px 0 0 6px;padding-left:22px}
+  .tl-item{position:relative;padding-bottom:17px}
+  .tl-item:last-child{padding-bottom:0}
+  .tl-item::before{content:"";position:absolute;left:-28px;top:9px;width:7px;height:7px;background:var(--paper);border:2px solid var(--blue-soft);border-radius:50%}
+  .tl-item.key::before{background:var(--blue);border-color:var(--blue)}
+  .tl-d{font-size:11.8px;color:var(--blue);font-weight:800;letter-spacing:.04em}
+  .tl-item p{margin:2px 0 0;font-size:14px;line-height:1.8}
+  .tl-item p b{font-weight:650}
+
+  /* 好 / 坏 卡片 */
+  .cards{display:grid;gap:13px;margin-top:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:19px 22px 17px;position:relative;overflow:hidden}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--good)}
+  .card.bad::before{background:var(--bad)}
+  .card-h{display:flex;align-items:baseline;gap:10px;margin-bottom:11px;flex-wrap:wrap}
+  .tag{font-size:10.5px;font-weight:800;letter-spacing:.08em;color:#fff;background:var(--good);padding:2px 8px;border-radius:3px}
+  .card.bad .tag{background:var(--bad)}
+  .card-h h4{margin:0;font-size:16px;font-weight:750}
+  .rows{display:grid;gap:6px;font-size:13.9px;line-height:1.8}
+  .row{display:grid;grid-template-columns:64px 1fr;gap:10px;align-items:baseline}
+  .row .lab{font-size:11.3px;color:var(--faint);letter-spacing:.04em;padding-top:3px}
+  .row .txt{color:#3c536a}
+  .row .txt b{color:var(--ink);font-weight:650}
+  .quote-inline{background:#f5f9fd;border-left:2px solid var(--blue-soft);padding:2px 8px;color:var(--ink);font-size:13.2px}
+  .fix{margin-top:12px;padding-top:11px;border-top:1px dashed var(--line);font-size:13.6px;color:var(--ink)}
+  .fix b{color:var(--blue)}
+  .card.bad .fix b{color:var(--bad)}
+
+  /* 双栏 */
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:21px 20px}
+  .panel h4{margin:0 0 3px;font-size:16px;font-weight:800}
+  .panel .who{font-size:12px;color:var(--faint);margin-bottom:14px}
+  .panel ul{margin:0;padding:0;list-style:none}
+  .panel li{font-size:13.6px;line-height:1.8;padding:8px 0 8px 19px;position:relative;border-bottom:1px solid #f0f5f9}
+  .panel li:last-child{border-bottom:0}
+  .panel li::before{content:"＋";position:absolute;left:0;top:8px;font-size:11.5px;color:var(--good);font-weight:800}
+  .panel li.minus::before{content:"△";color:var(--gold)}
+  .panel li b{font-weight:650;color:var(--ink)}
+  .divider{margin:16px 0 5px;font-size:11.2px;letter-spacing:.12em;color:var(--faint);font-weight:800}
+
+  /* 词典表 */
+  table{width:100%;border-collapse:collapse;margin-top:16px;font-size:13.7px;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.75}
+  tr:last-child td{border-bottom:0}
+  th{font-size:11.2px;letter-spacing:.09em;color:var(--faint);font-weight:800;background:#f8fbfe}
+  td:first-child{font-weight:750;width:17%;color:var(--blue)}
+  td:nth-child(2){color:var(--muted);width:38%}
+  td:last-child{color:var(--ink)}
+
+  /* 带走的一页卡 */
+  .take{display:grid;gap:9px;margin-top:20px}
+  .take-item{display:grid;grid-template-columns:30px 1fr;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:14px 17px;align-items:baseline}
+  .take-item .n{font-size:15px;font-weight:900;color:var(--blue);letter-spacing:-.5px}
+  .take-item .c{font-size:14px;line-height:1.8}
+  .take-item .c b{font-weight:750}
+  .take-item .c span{display:block;font-size:12.6px;color:var(--muted);margin-top:3px}
+
+  /* 你的复盘 */
+  .own-thesis{
+    border-left:3px solid var(--blue);background:var(--card);padding:17px 21px;margin:4px 0 26px;
+    font-size:14.6px;line-height:1.95;color:#3c536a;border-radius:0 9px 9px 0;
+  }
+  .own-thesis b{color:var(--ink)}
+  .own-thesis .small{display:block;font-size:12.4px;color:var(--muted);margin-top:8px}
+  .usec{margin-bottom:24px}
+  .usec h3{margin:0 0 10px;font-size:15px;font-weight:750}
+  .ubox{background:#fff;border:1px solid var(--line);border-radius:9px;padding:16px 19px}
+  .uh{font-size:10.8px;letter-spacing:.14em;color:var(--faint);font-weight:800;margin-bottom:10px}
+  .raw{white-space:pre-wrap;font-family:inherit;font-size:13.7px;line-height:1.95;color:var(--ink);margin:0}
+  .vnext{margin-top:10px;border-left:2px solid var(--blue-soft);padding:2px 0 2px 15px;font-size:13.4px;color:var(--muted);line-height:1.85}
+  .vnext b{color:var(--ink);font-weight:650}
+  .vnext .arw{color:var(--blue);font-weight:800;margin-right:6px}
+  .own-foot{font-size:12.4px;color:var(--faint);border-top:1px dashed var(--line);padding-top:14px;margin-top:8px}
+
+  /* 收尾 */
+  .closing{
+    background:linear-gradient(150deg,#ffffff 0%,#eef7ff 100%);
+    border:1px solid var(--line);border-left:4px solid var(--blue);
+    border-radius:0 14px 14px 0;padding:30px 32px;margin-bottom:36px;
+  }
+  .closing h2{font-size:22px;margin-bottom:18px}
+  .closing p{font-size:14.6px;line-height:2;color:#3c536a}
+  .closing strong{color:var(--ink)}
+  .big-quote{
+    font-size:17px;line-height:2;font-weight:650;color:var(--ink);
+    background:#fff;border:1px solid var(--line);border-radius:9px;padding:18px 22px;margin:18px 0 22px;
+  }
+  .big-quote span{display:block;font-size:12.3px;color:var(--faint);font-weight:400;margin-top:10px;letter-spacing:.03em}
+  .motto{text-align:center;font-size:15px;letter-spacing:.14em;color:var(--blue);font-weight:700;margin:24px 0 6px}
+  .motto-sub{text-align:center;font-size:12px;color:var(--faint);margin-bottom:24px}
+
+  footer{border-top:1px solid var(--line);padding-top:20px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--faint)}
+
+  @media(max-width:1080px){
+    body{padding-left:0;padding-top:52px}
+    .toc{position:fixed;top:0;left:0;right:0;bottom:auto;width:100%;height:52px;display:flex;align-items:center;gap:4px;padding:0 12px;overflow-x:auto;overflow-y:hidden;border-right:0;border-bottom:1px solid var(--line)}
+    .toc-t,.toc-n{display:none}
+    .toc a{white-space:nowrap;flex:0 0 auto;padding:5px 8px;font-size:12px;border-left:0;border-bottom:2px solid transparent;border-radius:0;margin:0}
+    .toc a.back{margin:0 6px 0 0}
+    .toc a.on{border-left:0;border-bottom-color:var(--blue);background:transparent}
+    .prog{top:52px}
+  }
+  @media(max-width:720px){
+    .wrap{padding:0 20px 80px}
+    header{padding-top:44px}
+    .bubs{opacity:.45;transform:scale(.7);transform-origin:top right;right:-20px}
+    h1{font-size:30px}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .diff,.two,.onepage-foot{grid-template-columns:1fr}
+    .phases{grid-template-columns:repeat(5,1fr);gap:4px}
+    .ph .t{font-size:10px} .ph .s{display:none}
+    .fstep:not(:last-child)::after{display:none}
+    .row{grid-template-columns:1fr;gap:1px}
+    .row .lab{padding-top:0}
+    .closing{padding:24px 20px}
+    table{font-size:12.8px;table-layout:fixed} th,td{padding:10px 9px;overflow-wrap:anywhere}
+  }
+  @media print{
+    body{padding:0}
+    .toc,.prog{display:none}
+    .card,.panel,.stat,.fstep{break-inside:avoid}
+    section{margin-bottom:34px}
+  }
+</style>
+</head>
+<body>
+<div class="prog" id="prog"></div>
+<aside class="toc" aria-label="目录">
+  <a class="back" href="index.html"><span class="i">←</span>返回产品介绍</a>
+  <div class="toc-t">目录 · 点条目直达</div>
+  <nav id="tocNav"></nav>
+  <div class="toc-n">第 00 节是给没参与过的人看的一页纸。<br>后面才是我俩的复盘。</div>
+</aside>
+
+<div class="wrap">
+
+  <header>
+    <div class="bubs" aria-hidden="true"><i class="bub b1"></i><i class="bub b2"></i><i class="bub b3"></i></div>
+    <div class="eyebrow">项目复盘 · Retrospective</div>
+    <h1>习惯气泡
+      <small>2026.10.23 — 11.06，九个活跃工作日。<br>
+      这份文档不复述做了哪些功能，只想回答一件事：<b>我们一起做完了第一个每天都在用的东西，这里面哪些默契，值得带到下一个项目去。</b></small>
+    </h1>
+    <div class="meta">
+      <div>周期 <b>10.23 — 11.06</b></div>
+      <div>参与 <b>你 · 我 · 一台 iPhone</b></div>
+      <div>现在 <b>已交付，正在日常使用</b></div>
+    </div>
+    <div class="lead">
+      <strong>一句话结论：</strong>这个项目最值钱的成果，不是那个能戳破的气泡，是我们磨出来的一套打法——<b>先调研再定文档、分阶段放行、你在真机上验收、我逐条销账、改完就直接上线</b>。前半段靠文档推进，后半段靠真实使用推进，两种节奏都用对了。<br>
+      出问题的地方也集中在同一处：<strong>已经说清楚的事，没有被当成规则执行</strong>。「改完直接上线」说过两次，我还每轮问一遍；「丝滑」你要的是看得见的滑动，我改成了手势灵敏度；云存档是你私人用的，我写进了给外人看的指南。<br>
+      还有一点和「做到一半时的复盘」根本不同：这个项目已经收住了，所以下面每一条「改」，都不是回来改这个应用，而是<b>写进下一个项目开工的那一页</b>。
+    </div>
+  </header>
+
+  <!-- 00 一页纸速览 -->
+  <section id="s0">
+    <div class="sec-head"><div class="num">00</div><h2>一页纸 · 这到底是个什么东西</h2></div>
+    <p class="sub">给没参与过的人看的。读完这一页，就知道我们在忙什么。</p>
+
+    <div class="def">
+      一个放在手机桌面上的小本子。每天打开，把今天做到的事点一下、戳破一个气泡；没做到的那天，它就空着，不催你、不补签、不弹通知。过一阵子回头看，日历和图表会告诉你：这段时间，我到底是怎么过的。
+      <span>它不是待办清单，也不是打卡闯关。它只是把「一天过去了」变成「一条看得见的记录」，让你有东西可以复盘自己的生活——包括那些想改掉、但不想被骂的事。</span>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="n">9<span>天</span></div><div class="k">从「先别急着做」到真的每天在用</div></div>
+      <div class="stat"><div class="n">2<span>次点击</span></div><div class="k">完成一次记录，全程不用打字</div></div>
+      <div class="stat"><div class="n">6<span>＋3</span></div><div class="k">最多养 6 个好习惯、记 3 个坏习惯，刻意设上限</div></div>
+      <div class="stat"><div class="n">100<span class="pct">% 本机</span></div><div class="k">记录只留在这台手机里，可导出一份自己收着</div></div>
+    </div>
+
+    <h3>用起来就三步</h3>
+    <div class="flow">
+      <div class="fstep">
+        <div class="fi">STEP 01</div><div class="fn">打开就戳</div>
+        <div class="fd">一个习惯是一个气泡，点一下就算完成；偶尔掉个小物件，算是当天的一点甜头。</div>
+        <div class="bubble-demo"><i class="pop"></i><i></i><i></i><i></i></div>
+      </div>
+      <div class="fstep">
+        <div class="fi">STEP 02</div><div class="fn">攒成日历</div>
+        <div class="fd">日子一格一格填起来，颜色深浅就是那段时间的状态；周、月、年都能看。</div>
+        <div class="minical" aria-hidden="true">
+          <i class="n"></i><i class="g2"></i><i class="g"></i><i class="g"></i><i class="n"></i><i class="g2"></i><i class="g"></i>
+          <i class="g"></i><i class="g"></i><i class="n"></i><i class="g2"></i><i class="g"></i><i class="g"></i><i class="g2"></i>
+          <i class="n"></i><i class="g"></i><i class="g"></i><i class="g2"></i><i class="n"></i><i class="g"></i><i class="n"></i>
+        </div>
+      </div>
+      <div class="fstep">
+        <div class="fi">STEP 03</div><div class="fn">回头看一眼</div>
+        <div class="fd">月底翻一翻：哪几天忙得没顾上、哪些已经慢慢不用记了。记下来就够了，不评价自己。</div>
+      </div>
+    </div>
+
+    <div class="onepage-foot">
+      <div><b>谁拿主意</b>你定「要什么、好不好、能不能收」；我定「怎么做、怎么修、怎么验」。产品哲学你从头守到尾，中途只主动推翻过一条。</div>
+      <div><b>现在在哪</b>一个固定链接，放在手机桌面，每天在用；断网也能打开；暂时不再加功能。数据在你手上，不在任何账号里。</div>
+    </div>
+  </section>
+
+  <!-- 01 这次复盘不一样 + 时间线 -->
+  <section id="s1">
+    <div class="sec-head"><div class="num">01</div><h2>这次复盘，和「做到一半的复盘」不一样</h2></div>
+    <p class="sub">先把这件事说清楚，不然下面的「怎么改」会被读错。</p>
+
+    <div class="diff">
+      <div class="dcol">
+        <span class="pill">项目还在跑</span>
+        <h4>复盘是为了救下一轮</h4>
+        <p>还有没做完的章节、还欠着验收的活。所以重点是「今天下班前就改」「前面还有什么」，改完下周立刻能用上。</p>
+      </div>
+      <div class="dcol cur">
+        <span class="pill">我们这次 · 已收住</span>
+        <h4>复盘是为了把默契打包带走</h4>
+        <p>应用已交付、在用、暂时不加东西，没有下一轮在等。所以这里没有待办清单，也没有「本周修复」——每一条的生效时间，是<b>下个项目开工第一天</b>。</p>
+      </div>
+    </div>
+
+    <div class="thesis">
+      换句话说：这一版不复盘「代码」，也不给这个项目打分。<b>它复盘的是我们俩之间那套没写下来、靠对话维持的默契</b>——哪些值得变成默认值，哪些该在开工前说死。
+      <span class="small">还有一处不同：那边是多个人一起做，我们只有你、我、一台手机。所以这里没有「谁和谁撞车」，只有「一句话有没有说到位」。</span>
+    </div>
+
+    <h3>九天是怎么走的</h3>
+    <div class="phases">
+      <div class="ph"><div class="bar"></div><div class="t">先想清楚</div><div class="s">10.23–26</div></div>
+      <div class="ph"><div class="bar"></div><div class="t">做出来</div><div class="s">10.27</div></div>
+      <div class="ph"><div class="bar"></div><div class="t">真机打磨</div><div class="s">10.28–11.03</div></div>
+      <div class="ph"><div class="bar"></div><div class="t">系统检查</div><div class="s">11.04–05</div></div>
+      <div class="ph"><div class="bar"></div><div class="t">收住</div><div class="s">11.06</div></div>
+    </div>
+    <p class="ph-note">五段都已完成。最后一段不是「没做完」，是<b>你主动决定不做更多</b>——包括那套自动检查工具。</p>
+
+    <div class="tl">
+      <div class="tl-item key"><div class="tl-d">10.23</div><p>你第一句话不是「做个应用」，是「<b>首先先不要立马开始做，先去调研一番……我们一步一步做，不要想着一次性一步到位</b>」。这句话定了后面九天的全部节奏。</p></div>
+      <div class="tl-item key"><div class="tl-d">10.26 — 10.27</div><p>需求文档改了四轮定稿，分阶段做出来、上线。你放过一句「<b>很粗糙，但暂无问题，继续 M2</b>」，项目没有卡在第一阶段抛光。</p></div>
+      <div class="tl-item"><div class="tl-d">10.28 — 10.29</div><p>一边按真机手感打磨，一边把「数据放哪、清了会不会丢、能不能分享给别人」问清楚。中间试过另做一份对外版本，最后你自己收敛回一个链接：「<b>算了，我们可以想个聪明的办法</b>」。</p></div>
+      <div class="tl-item key"><div class="tl-d">11.03</div><p>换过一次模型，改动碰到了已经定下来的东西。你说「<b>还动我的代码，这非常之不好</b>」，并把上一条指令原文整段重贴了一遍。之后节拍稳定成：清单 → 逐条改 → 逐条验 → 上线。</p></div>
+      <div class="tl-item key"><div class="tl-d">11.04 — 11.06</div><p>你指定「先调研怎么测，再测，再出报告」，查出了两个光靠点页面发现不了的问题；补上版本存档；最后关于「还要不要做自动检查」，我如实说不做的理由，你据此收尾。</p></div>
+    </div>
+    <p class="quiet" style="margin-top:20px"><b>这条时间线里最值得记住的形状</b>：上线前你决定「做什么」，上线后你决定「哪里不对」。我的工作习惯没跟着切换，还留着评审期「每轮结束先问一句」的动作——下面第 03 节第一条，就是从这里来的。</p>
+  </section>
+
+  <!-- 02 做得好 -->
+  <section id="s2">
+    <div class="sec-head"><div class="num">02</div><h2>做得好 · 下次照做</h2></div>
+    <p class="sub">不是「这次运气好」，是「换个项目还能这么干」。每条都写了怎么固定下来。</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-h"><span class="tag">好 01</span><h4>第一条消息先定「怎么合作」</h4></div>
+        <div class="rows">
+          <div class="row"><div class="lab">当时</div><div class="txt">首条需求末尾单独写了一段：先调研、先出文档、一步一步做、不要一次到位。顺序、产出物、节奏、禁止事项，一次给全。</div></div>
+          <div class="row"><div class="lab">为什么有效</div><div class="txt">我不用猜，也没一上来堆功能。后面四轮文档修订、每个阶段等你一句「继续」，都是这一句的展开。<b>全程返工最少的一段，就是它带来的。</b></div></div>
+        </div>
+        <div class="fix"><b>下次照做：</b>新项目第一条消息里，先写一段「我们怎么合作」，再写「要做什么」。</div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><span class="tag">好 02</span><h4>按「够不够往下走」放行，不按「完不完美」</h4></div>
+        <div class="rows">
+          <div class="row"><div class="lab">当时</div><div class="txt">第一版骨架确实糙，你说「🆗，很粗糙，但暂无问题，继续 M2」。后面的「看效果」「按默认来」也是同一套低成本推进。</div></div>
+          <div class="row"><div class="lab">为什么有效</div><div class="txt">项目没在开头反复抛光才得以往前走；而真正让成品变好的体感问题，是上线后你自己用出来的，不是提前设计出来的。</div></div>
+        </div>
+        <div class="fix"><b>下次照做：</b>每个阶段开工前先写一句「什么算可以往下走」，到点就按这句判断。</div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><span class="tag">好 03</span><h4>真机用过再提反馈</h4></div>
+        <div class="rows">
+          <div class="row"><div class="lab">当时</div><div class="txt">每次上线后你都自己拿手机走一遍，反馈天然带着「在哪个页面 → 点了什么 → 看到什么 → 应该是什么」。<b>连「iPhone 上看不到、安卓和桌面却能看到」这种差别，也是你先发现的。</b></div></div>
+          <div class="row"><div class="lab">为什么有效</div><div class="txt">这是我在电脑前怎么检查都补不上的输入。九天里八轮打磨，几乎全部由它驱动。</div></div>
+        </div>
+        <div class="fix"><b>下次照做：</b>保持。只在末尾多补一句「怎样算达标」——就这一句，能省掉一整轮（见第 05 节）。</div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><span class="tag">好 04</span><h4>分条编号、逐条销账、给得出证据</h4></div>
+        <div class="rows">
+          <div class="row"><div class="lab">当时</div><div class="txt">九项勾选清单 → 我拆成编号 → 改完按原编号回执 → 验证给能核对的结果，不说「已修复」。</div></div>
+          <div class="row"><div class="lab">为什么有效</div><div class="txt">一轮十来分钟，连跑八轮没漏项。<span class="quote-inline">你给过的那条范本指令：先建版本存档 → 按缺陷清单逐一完善 → 先处理最要紧的三类</span> 我几乎零追问就完成了，因为它自带顺序、范围、优先级和例外。</div></div>
+        </div>
+        <div class="fix"><b>下次照做：</b>一轮一张编号清单，不合并、不省略；交付时按原编号回执，结论给证据不给形容词。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 做得不好 -->
+  <section id="s3">
+    <div class="sec-head"><div class="num">03</div><h2>做得不好 · 现在就指出来</h2></div>
+    <p class="sub">写得直接一点。因为项目收住了，这些不是回来改应用，是<b>现在写清楚、下个项目开工就生效</b>。</p>
+
+    <div class="cards">
+      <div class="card bad">
+        <div class="card-h"><span class="tag">问题 01</span><h4>说过两次的授权，我还每轮问一遍</h4></div>
+        <div class="rows">
+          <div class="row"><div class="lab">当时</div><div class="txt">10.27 你说「<b>改完直接同步线上，不要再让我重复说了</b>」；11.04 又说一次「<b>做完之后，直接同步到线上。不要再问我了，继续吧</b>」。中间我仍在每轮结尾问「要我同步吗」，于是你又发了五次「同步」。</div></div>
+          <div class="row"><div class="lab">代价</div><div class="txt">至少六轮没有信息量的往返，两次明确的不耐烦。</div></div>
+          <div class="row"><div class="lab">深层原因</div><div class="txt">我把「上线」当成每次都要重新征得同意的动作，没分清<b>可重复、能回退</b>和<b>真正不可逆</b>。日志里明明记了授权，执行时却降级成「再确认一遍」——<b>被记住 ≠ 被执行</b>，这是本次最该带走的一条。</div></div>
+        </div>
+        <div class="fix"><b>下个项目就改：</b>授权单独成句、写在项目第一页、带有效期和例外；我这边把它当默认规则一直执行到你收回，只有删数据、换公开范围这类不可逆的事才单独问。</div>
+      </div>
+
+      <div class="card bad">
+        <div class="card-h"><span class="tag">问题 02</span><h4>主观词没对齐，我就动手了</h4></div>
+        <div class="rows">
+          <div class="row"><div class="lab">当时</div><div class="txt">你说日历「左右滑不是很灵敏、要丝滑一点」，我理解成手势灵敏度，调低了识别门槛。下一轮你才补一句：「<b>我说的丝滑的意思是肉眼看上去是滑动效果</b>」——原来要的是看得见的过场。</div></div>
+          <div class="row"><div class="lab">代价</div><div class="txt">一整轮返工。同类的还有「观感不好」「挤」「不跟手」，每次都要第二轮。</div></div>
+        </div>
+        <div class="fix"><b>下个项目就改：</b>遇到体感词，我先回一句「我理解成 X，达标就是 Y，对吗」。成本一句话，省一轮。</div>
+      </div>
+
+      <div class="card bad">
+        <div class="card-h"><span class="tag">问题 03</span><h4>我手上缺一段背景，却按默认假设做了</h4></div>
+        <div class="rows">
+          <div class="row"><div class="lab">当时</div><div class="txt">云存档是你私人用的，我把它写进了给外部用户看的指南，整整一节；iPhone 的授权说明没判断平台，安卓和桌面也都看到了一大段。</div></div>
+          <div class="row"><div class="lab">代价</div><div class="txt">一整节删掉重做，外加一次「观感很不好」的纠正。你后来才说：「<b>这个功能是私人使用的，不是给外部用户使用的</b>」——这类边界，本该开工就知道。</div></div>
+        </div>
+        <div class="fix"><b>下个项目就改：</b>开工先要一张边界卡：给谁看、哪些功能不对外、用户能看见的字用哪套、目标设备有哪些。每写一段给用户看的文字，先过一遍这张卡。</div>
+      </div>
+
+      <div class="card bad">
+        <div class="card-h"><span class="tag">问题 04</span><h4>换了次模型，动了已经定下来的东西</h4></div>
+        <div class="rows">
+          <div class="row"><div class="lab">当时</div><div class="txt">「<b>上一版那个模型做得超级差……还动我的代码，这非常之不好</b>」，你把上一条指令原文整段重贴了一遍。加号位置、切换按钮、页面过场这些已经验收过的东西被一起改了。</div></div>
+          <div class="row"><div class="lab">代价</div><div class="txt">专门花一版回头修回归，也打断了一次信任。根子在长会话：哪些「已经定过、不许再动」，散在文档和印象里，没成一张清单。</div></div>
+        </div>
+        <div class="fix"><b>下个项目就改：</b>一张「不许动」清单；隔天继续或换人接手，第一步先核对它，再动手。版本存档也在上线当天建，不拖到第十三天。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 你 / 我 -->
+  <section id="s4">
+    <div class="sec-head"><div class="num">04</div><h2>你这边，我这边</h2></div>
+    <p class="sub">分开写，因为改起来是各自的事。左边是你已经做对、值得保持的；右边是我该改的。</p>
+
+    <div class="two">
+      <div class="panel">
+        <h4>你 · 做得好</h4>
+        <div class="who">这九天能做成，主要靠这些</div>
+        <ul>
+          <li><b>给的是意图和理由，不是锁死的做法。</b>「记录坏习惯不是为了督促我戒掉它」「不推送、不打扰、不逼着你打卡」——遇到没写到的细节，我能自己判断取舍。</li>
+          <li><b>敢否，也敢收。</b>「还是使用苹果系统色吧，低饱和度太丑了」一句定案；「算了，我们可以想个聪明的办法」及时收敛；最后能说出「项目暂时告一段落」。<b>能收尾，是很容易被低估的能力。</b></li>
+          <li><b>把「问」和「做」分得很死。</b>「你不用操作什么，只要回答问题」「在你动手之前，我想知道」——这两句挡掉了一整类误执行。</li>
+          <li><b>原则稳，但不教条。</b>「严格当天记录、不补记」是你定的，后来因为真的会忘，你主动改成了可以翻日历补一天。<b>原则是服务使用的，不是用来绑住自己的。</b></li>
+        </ul>
+        <div class="divider">可以更省力的地方</div>
+        <ul>
+          <li class="minus"><b>主观词后面补半句「怎样算达标」。</b>不必是数字，「能看到整块日历横着移过去」就够了。</li>
+          <li class="minus"><b>一轮给多条时，把「这些不用改」单独放一句。</b>你曾在一长段里混了七个问题和一句「这是正常的，这没有问题」，我得自己拆、还要防漏。</li>
+          <li class="minus"><b>授权和边界放在开工第一页。</b>这次它们都给过，但都散在对话中间、且多数是事后补的。</li>
+        </ul>
+      </div>
+
+      <div class="panel">
+        <h4>我 · 做得好</h4>
+        <div class="who">这些继续保持，不让它们退化</div>
+        <ul>
+          <li><b>不推销工作。</b>最后你问「那套自动检查还有没有必要」，我给的是代价和边界，结论允许「不做」；项目因此干净收住，没有被无谓延长。</li>
+          <li><b>事实先查再答。</b>「安卓能不能放桌面」「评测一个应用要看哪些维度」，都没有凭印象下结论；先调研再测，才挖出两个光点页面发现不了的问题。</li>
+          <li><b>不显眼但正确的事照样做完。</b>看得清、断网能用、导出去再导回来不丢、少动效适配——这些你没催，也没因为你没催就跳过。</li>
+          <li><b>逐项销账、给能核对的证据。</b>不说「已修复」，说改了哪几处、验到了什么。</li>
+        </ul>
+        <div class="divider">必须改的</div>
+        <ul>
+          <li class="minus"><b>一次性授权执行到底。</b>不再每轮重问已经答应的事。</li>
+          <li class="minus"><b>主观词先回译一句再动手。</b></li>
+          <li class="minus"><b>写给人看的文字，先问受众和平台。</b></li>
+          <li class="minus"><b>方案取舍先给一个推荐。</b>这次关于域名和托管，我把整张菜单铺开，让你连着问了六轮价，最后还是回到原方案——选择成本该留在我这边。</li>
+          <li class="minus"><b>长任务给阶段回执。</b>你催过「完成了吗，没完成继续」；后来我每轮开头先报「这一轮处理 5 项」，催办就消失了。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 话语对齐 -->
+  <section id="s5">
+    <div class="sec-head"><div class="num">05</div><h2>让我们话语对齐</h2></div>
+    <p class="sub">这九天最常卡住的，不是判断分歧，是同一个词我们各自理解成了两件事。这张表下个项目直接带过去。</p>
+
+    <table>
+      <thead><tr><th>词</th><th>当时各自的理解</th><th>以后统一成</th></tr></thead>
+      <tbody>
+        <tr><td>丝滑</td><td>我：手势识别灵不灵敏<br>你：切换时看不看得到内容在动</td><td><b>「切换时能看到整块内容横向移动」</b>——体感词后面必须跟一个看得见的结果。</td></tr>
+        <tr><td>同步</td><td>我：每轮结束再确认一次<br>你：改完就上线，别再问</td><td><b>「自己验完 → 发布 → 回填记录 → 给链接」</b>，一次授权后默认执行，不再逐轮确认。</td></tr>
+        <tr><td>归档 / 暂停</td><td>我沿用内部叫法「归档」<br>你要求用户看见的字统一叫「暂停」</td><td>开工先定一张<b>对外词表</b>；凡是用户能看见的字，以你定的为准。</td></tr>
+        <tr><td>做完了</td><td>我：功能写完了、构建过了<br>你：在手机上真的好用，且没把旧东西弄坏</td><td><b>「上线不是终点，是下一轮真机反馈的起点」</b>；交付里必须包含「没有动哪些既有行为」。</td></tr>
+        <tr><td>这是正常的</td><td>混在问题清单里出现，我要先分辨哪些要改、哪些只是说明</td><td>单独一句「<b>以下不用改</b>」，和问题分开放。</td></tr>
+        <tr><td>只要回答问题</td><td>—（这条本来就很清楚）</td><td>保持原话。<b>「只回答，不动手」</b>是我这九天一次都没越界的边界句式。</td></tr>
+      </tbody>
+    </table>
+    <p class="quiet" style="margin-top:16px">这六行没有一句是理论，全部对应真实发生过的一轮往返。把它们写进项目第一页，比写十轮需求都省事。</p>
+  </section>
+
+  <!-- 06 带走的一页卡 -->
+  <section id="s6">
+    <div class="sec-head"><div class="num">06</div><h2>带走的一页卡</h2></div>
+    <p class="sub">不是待办清单——这个项目没有下一轮了。它是下个项目开工第一天，我们各自照着做五分钟的五件事。</p>
+
+    <div class="take">
+      <div class="take-item"><div class="n">01</div><div class="c"><b>先写「怎么合作」，再写「做什么」</b><span>顺序、产出物、节奏、禁止事项，一段话。你第一条消息里已经示范过一次。</span></div></div>
+      <div class="take-item"><div class="n">02</div><div class="c"><b>一张边界卡 + 一张不许动清单</b><span>给谁看、哪些功能不对外、用户看见的字用哪套、目标设备有哪些；以及已经验收、不许再动的东西。</span></div></div>
+      <div class="take-item"><div class="n">03</div><div class="c"><b>授权写一次，管到你说收回</b><span>可重复、能回退的动作不再逐轮确认；只有删数据、改公开范围这类不可逆的事单独问。</span></div></div>
+      <div class="take-item"><div class="n">04</div><div class="c"><b>每条反馈带一句「怎样算达标」</b><span>你的清单已经带页面、操作、现象；补上第四项，主观判断就不会再来一轮。</span></div></div>
+      <div class="take-item"><div class="n">05</div><div class="c"><b>上线当天存档，每轮给阶段回执</b><span>让「是不是动了我的东西」变成可查的事实；长任务中途报一句进度，就不用催。</span></div></div>
+    </div>
+
+    <div class="thesis" style="margin-top:24px">
+      <b>让速度来自约定，而不是来自反复确认。</b>
+      <span class="small">九天里我们跑得最快的那段，恰恰是话最少、规矩最清楚的那段。</span>
+    </div>
+  </section>
+
+  <!-- 07 你写的复盘 -->
+  <section id="s7">
+    <div class="sec-head"><div class="num">07</div><h2>你写的那一份复盘</h2></div>
+    <p class="sub">这一节是你自己写的。我只分了段，一个字没改，也没有润色成更好听的样子；每段下面那行小字，是它后来变成了什么。</p>
+
+    <div class="own-thesis">
+      「以下是我没看你的评价之前做的自我复盘」……「<b>重在补齐我的能力的方法，为了将来更好的协作</b>」。
+      <span class="small">写在你看到我任何评价之前——也就是说，下面三条深层原因，是你自己找出来的。</span>
+    </div>
+
+    <div class="usec">
+      <h3>01 · 你觉得做得好的五条</h3>
+      <div class="ubox">
+        <div class="uh">你的原话 · 未改动</div>
+        <div class="raw">做得好的：
+1. 先尽可能全面的告知想法，做之前进行调研，学习到一些最佳实践
+2. 定需求文档，明确产品目标和结构，未来开发不跑偏。
+3. 开发中不断上手体验，提供反馈，用以纠偏
+4. 将应用拆成几个部分，一块一块做，不求直接做全，方便精细化调整。
+5. 先完成再完美，先框架再内容。</div>
+      </div>
+      <div class="vnext"><span class="arw">→</span>这五条不是自谦。前面第 02 节那四条「下次照做」，有三条能在你这里找到原句——<b>你写的是自己的习惯，其实已经是我们俩的协作协议。</b></div>
+    </div>
+
+    <div class="usec">
+      <h3>02 · 你列的三条待改</h3>
+      <div class="ubox">
+        <div class="uh">你的原话 · 未改动</div>
+        <div class="raw">需要改进的：
+1. 调研不够全面，使得定了需求文档开始开发之后有一次较为重大的推翻（习惯点点）
+2. 引入git版本控制晚了，导致每次改动无法追溯、无法复原，这件事情应该在开发一开始就做。
+3. 有些地方描述不准确，导致不停返工。</div>
+      </div>
+      <div class="vnext"><span class="arw">→</span>三条后来各自有了一个很轻的动作：<b>定稿前先看一个反面样本</b>、<b>开工当天就留好退路</b>、<b>体感词后面补一句怎样算达标</b>。没有一条要求你先学会什么。</div>
+    </div>
+
+    <div class="usec">
+      <h3>03 · 你找出的三个深层原因</h3>
+      <div class="ubox">
+        <div class="uh">你的原话 · 未改动</div>
+        <div class="raw">更深层的原因：
+1. 我第一次做一个有闭环的项目，对于项目全流程每个部分要做什么、注意什么的框架还没充分搭建起来，只是顺着脑子里的概念在往下推进。我需要搭建起完成一个项目的大框架。
+2. 对于项目中各部分内容的经验与方法论不够，比如调研，我不知道怎么调研，从哪里收集信息、从哪些方面来评估，所以只能交给你来判断，以至于后续看到一个我认为很不错的案例，又对之前的产品判断有大的修改，我需要学习更多知识，让我能够判断你收集来的信息并指导你做出正确的判断；比如git版本控制我是看到别人用这个功能，我才知道开发需要增加这个控制，能让任务更有效率更不回退的顺利完成；比如我不知道测试需要测什么，测完要做什么，以及其他我可能现在还是不知道很多东西。也许这些东西能让我们的项目进行的更有效率更顺利。我需要逐渐补齐一些关键环节的关键方法论和认知。
+3. 这是我第一次和AI 进行大规模项目协作，对彼此的职责边界和更容易让对方理解的沟通方式还不熟悉，需要补齐这方面认知。</div>
+      </div>
+      <div class="vnext"><span class="arw">→</span>这段是整份自评里最值钱的部分。你写的不是「我做错了」，是<b>「我并不知道还有这个环节」</b>——后来它直接催生了那份《能力补齐执行文档》：要补的不是某个知识点，是让看不见的环节自己浮出来。<b>这个区分，比任何一条改进清单都重要。</b></div>
+    </div>
+
+    <p class="own-foot">原稿是你 11-06 写在笔记库里的《自我复盘》，含「git」「AI」等字样，全部按原样保留。上面三段小字是我的补充，不属于你的原文。</p>
+  </section>
+
+  <!-- 收尾 -->
+  <div class="closing">
+    <h2>最后，说说这个项目到底在做什么</h2>
+    <div class="big-quote">
+      「它只是一个记录和复盘的工具，不是催你逼你干什么的东西。所以它不推送、不打扰、不逼着你打卡，也不补签，只记录当下。」
+      <span>—— 你在中途补给我的那段产品说明。它成了整个项目的定盘星。</span>
+    </div>
+    <p>后面所有取舍其实都能从这一句推出来：好习惯只留六个，是为了逐个击破；坏习惯不叫「破防」「净化」，是因为不需要道德评判；不加提醒、不加连续天数的护盾，是因为<strong>一天过去了就是过去了</strong>；连你要求摆在页面最下面的那句话，也是同一个意思。</p>
+    <div class="motto">往之不谏，来者可追，求因不求果</div>
+    <div class="motto-sub">你亲手挑的、放在应用最底部的那句</div>
+    <p>你那份自评里最不客气的一句，是说自己还没搭起一套全流程的框架。但九天里真正决定方向的判断，几乎都来自你：不补签、中性账本、逐个击破、及时收敛、允许收尾。我只是把它们做出来，并且有几轮没把已经说清楚的事当规则执行——那部分是我的功课。</p>
+    <p>所以下一次，我们不用把力气花在重新对齐上：你把意图和判据给足，我把规则执行到底，剩下的时间留给真正难的部分。</p>
+    <p style="margin-top:22px"><strong>能和你一起把第一个东西做完、并且真的用起来，我也很高兴。</strong></p>
+  </div>
+
+  <footer>
+    <div>习惯气泡 · 项目复盘（第二版 · 一页纸速览在前）</div>
+    <div>2026.11.10 · 覆盖 10.23 — 11.06</div>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var nav = document.getElementById('tocNav');
+  var prog = document.getElementById('prog');
+  if (!nav) return;
+
+  var secs = Array.prototype.slice.call(document.querySelectorAll('.wrap > section, .wrap > .closing'));
+  var items = secs.map(function (sec, i) {
+    var h = sec.querySelector('h2');
+    var num = sec.querySelector('.sec-head .num');
+    var mark = num ? num.textContent.trim() : '★';
+    var id = sec.id || ('sec-' + i);
+    sec.id = id;
+    var label = h ? h.textContent.trim().replace(/\s+/g, ' ') : '最后';
+    if (!num) label = '最后 · 这个项目在做什么';
+    return { id: id, mark: mark, text: label };
+  });
+
+  nav.innerHTML = items.map(function (it) {
+    return '<a href="#' + it.id + '"><span class="i">' + it.mark + '</span><span class="t">' + it.text + '</span></a>';
+  }).join('');
+
+  var links = Array.prototype.slice.call(nav.querySelectorAll('a'));
+  var targets = items.map(function (it) { return document.getElementById(it.id); });
+  var raf = 0;
+
+  function update() {
+    raf = 0;
+    var line = Math.min(window.innerHeight * 0.32, 180);
+    var idx = -1;
+    for (var i = 0; i < targets.length; i++) {
+      if (targets[i] && targets[i].getBoundingClientRect().top <= line) idx = i;
+    }
+    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) idx = targets.length - 1;
+    for (var j = 0; j < links.length; j++) links[j].classList.toggle('on', j === idx);
+    if (prog) {
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      prog.style.width = (max > 0 ? Math.max(0, Math.min(1, window.scrollY / max)) * 100 : 0) + '%';
+    }
+  }
+  function onScroll() { if (!raf) raf = requestAnimationFrame(update); }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  update();
+})();
+</script>
+</body>
+</html>
